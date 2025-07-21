@@ -1,4 +1,3 @@
-// backend/routes/abayaModelRoutes.js
 const express = require('express');
 const router = express.Router();
 const AbayaModel = require('../models/AbayaModel');
@@ -18,7 +17,8 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const abayaModels = await AbayaModel.find();
-    res.json(abayaModels);
+    // خليه يرجع { models: [] } عشان الفرونت يفهمه على طول
+    res.json({ models: abayaModels });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -33,6 +33,34 @@ router.post('/bulk-upload', async (req, res) => {
 
     await AbayaModel.insertMany(models);
     res.json({ status: "تم رفع كل الموديلات!", count: models.length });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// تعديل موديل
+router.put('/:id', async (req, res) => {
+  try {
+    const abayaModel = await AbayaModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!abayaModel)
+      return res.status(404).json({ error: "الموديل غير موجود." });
+    res.json(abayaModel);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// حذف موديل
+router.delete('/:id', async (req, res) => {
+  try {
+    const abayaModel = await AbayaModel.findByIdAndDelete(req.params.id);
+    if (!abayaModel)
+      return res.status(404).json({ error: "الموديل غير موجود." });
+    res.json({ status: "تم حذف الموديل." });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
