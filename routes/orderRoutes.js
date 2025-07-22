@@ -371,5 +371,15 @@ router.post('/bulk-delete', async (req, res) => {
   }
 });
 
+router.put('/:id', async (req, res) => {
+  try {
+    const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!order) return res.status(404).json({ error: "الطلب غير موجود" });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 module.exports = router;
