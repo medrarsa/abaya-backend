@@ -320,4 +320,56 @@ const pipeline = [
   }
 });
 
+
+
+// تعديل طلب
+router.put('/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      req.body, // يستقبل أي حقول تحتاج تعديل: { customer, orderNumber, notes, ... }
+      { new: true }
+    );
+    if (!order) return res.status(404).json({ error: "الطلب غير موجود" });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// حذف طلب (مع حذف كل القطع التابعة له)
+router.delete('/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findByIdAndDelete(req.params.id);
+    if (!order) return res.status(404).json({ error: "الطلب غير موجود" });
+
+    // احذف كل OrderItems التابعة لهذا الطلب
+    await OrderItem.deleteMany({ order: order._id });
+    res.json({ message: "تم حذف الطلب وجميع القطع التابعة له" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// حذف جماعي (حسب الفلتر)
+router.post('/orders/bulk-delete', async (req, res) => {
+  try {
+    const { groupDate, groupNumber } = req.body;
+    const filter = {};
+    if (groupDate) filter.groupDate = groupDate;
+    if (groupNumber) filter.groupNumber = groupNumber;
+    const orders = await Order.find(filter);
+
+    // احذف كل OrderItems المرتبطة
+    const orderIds = orders.map(o => o._id);
+    await OrderItem.deleteMany({ order: { $in: orderIds } });
+
+    // احذف الطلبات
+    await Order.deleteMany(filter);
+
+    res.json({ message: "تم حذف جميع الطلبات والقطع في الفلتر المحدد", deletedOrders: orderIds.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;
