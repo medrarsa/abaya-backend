@@ -293,4 +293,27 @@ router.delete('/by-order/:orderId', async (req, res) => {
 });
 
 
+router.put('/:id', async (req, res) => {
+  try {
+    const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!order) return res.status(404).json({ error: "الطلب غير موجود" });
+
+    // لو فيه حقول تبي تنسخها للقطع (مثلاً groupDate, groupNumber, city)
+    const updateFields = {};
+    if (req.body.groupDate) updateFields.groupDate = req.body.groupDate;
+    if (req.body.groupNumber) updateFields.groupNumber = req.body.groupNumber;
+    if (req.body.city) updateFields.city = req.body.city;
+
+    // عدّل كل القطع التابعة لنفس الطلب
+    if (Object.keys(updateFields).length) {
+      await OrderItem.updateMany({ order: req.params.id }, { $set: updateFields });
+    }
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;
