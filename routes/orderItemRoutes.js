@@ -315,5 +315,15 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// تعديل تفاصيل القطعة (orderitem)
+router.put('/edit-item/:id', async (req, res) => {
+  try {
+    const item = await OrderItem.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!item) return res.status(404).json({ error: "القطعة غير موجودة" });
+    res.json(item);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 module.exports = router;
