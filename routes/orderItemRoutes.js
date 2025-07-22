@@ -269,4 +269,16 @@ router.delete('/delete-with-order/:orderItemId', async (req, res) => {
   }
 });
 
+// routes/orderItemRoutes.js
+router.delete('/orderitems/:id', async (req, res) => {
+  try {
+    const item = await OrderItem.findByIdAndDelete(req.params.id);
+    if (!item) return res.status(404).json({ error: "القطعة غير موجودة" });
+    res.json({ message: "تم حذف القطعة بنجاح" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;
