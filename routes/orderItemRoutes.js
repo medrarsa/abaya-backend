@@ -127,6 +127,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // حذف جميع الطلبات لمجموعة معيّنة
+// DELETE /api/orderitems/group-delete?groupDate=YYYY-MM-DD&groupNumber=1
 router.delete('/group-delete', async (req, res) => {
   try {
     const { groupDate, groupNumber } = req.query;
@@ -136,6 +137,7 @@ router.delete('/group-delete', async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
  // backend/routes/orderItemRoutes.js
 
  router.get('/new', async (req, res) => {
