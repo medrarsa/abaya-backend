@@ -321,21 +321,7 @@ const pipeline = [
 });
 
 
-
-// تعديل طلب
-router.put('/orders/:id', async (req, res) => {
-  try {
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      req.body, // يستقبل أي حقول تحتاج تعديل: { customer, orderNumber, notes, ... }
-      { new: true }
-    );
-    if (!order) return res.status(404).json({ error: "الطلب غير موجود" });
-    res.json(order);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+ 
 // حذف طلب (مع حذف كل القطع التابعة له)
 router.delete('/orders/:id', async (req, res) => {
   try {
@@ -370,6 +356,8 @@ router.post('/bulk-delete', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+ 
 
 router.put('/:id', async (req, res) => {
   try {
