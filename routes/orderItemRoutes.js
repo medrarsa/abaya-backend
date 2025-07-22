@@ -271,4 +271,14 @@ router.delete('/delete-with-order/:orderItemId', async (req, res) => {
   }
 });
 
+// حذف كل القطع التابعة لطلب معين
+router.delete('/by-order/:orderId', async (req, res) => {
+  try {
+    const result = await OrderItem.deleteMany({ order: req.params.orderId });
+    res.json({ message: "تم حذف جميع القطع للطلب المحدد", deletedCount: result.deletedCount });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
