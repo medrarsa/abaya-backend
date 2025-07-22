@@ -271,14 +271,26 @@ router.delete('/delete-with-order/:orderItemId', async (req, res) => {
   }
 });
 
-// حذف كل القطع التابعة لطلب معين
+// حذف جميع القطع للطلب وحذف الطلب نفسه إذا ما بقي قطع
 router.delete('/by-order/:orderId', async (req, res) => {
   try {
-    const result = await OrderItem.deleteMany({ order: req.params.orderId });
-    res.json({ message: "تم حذف جميع القطع للطلب المحدد", deletedCount: result.deletedCount });
+    // 1. احذف كل القطع لهذا الطلب
+    const deleted = await OrderItem.deleteMany({ order: req.params.orderId });
+
+    // 2. تحقق هل بقي قطع للطلب في القاعدة؟
+    const count = await OrderItem.countDocuments({ order: req.params.orderId });
+
+    // 3. إذا لا يوجد أي قطع، احذف الطلب نفسه!
+    if (count === 0) {
+      await require('../models/Order').findByIdAndDelete(req.params.orderId);
+      return res.json({ message: "تم حذف جميع القطع والطلب نفسه", deletedCount: deleted.deletedCount });
+    }
+
+    res.json({ message: "تم حذف جميع القطع للطلب المحدد", deletedCount: deleted.deletedCount });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;
