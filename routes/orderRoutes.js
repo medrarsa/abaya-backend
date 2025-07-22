@@ -337,20 +337,20 @@ router.put('/orders/:id', async (req, res) => {
   }
 });
 // حذف طلب (مع حذف كل القطع التابعة له)
-// routes/orderRoutes.js
 router.delete('/orders/:id', async (req, res) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);
     if (!order) return res.status(404).json({ error: "الطلب غير موجود" });
+
+    // احذف كل OrderItems التابعة لهذا الطلب
     await OrderItem.deleteMany({ order: order._id });
-    res.json({ message: "تم حذف الطلب وجميع القطع التابعة" });
+    res.json({ message: "تم حذف الطلب وجميع القطع التابعة له" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 // حذف جماعي (حسب الفلتر)
-router.post('/orders/bulk-delete', async (req, res) => {
+router.post('/bulk-delete', async (req, res) => {
   try {
     const { groupDate, groupNumber } = req.body;
     const filter = {};
